@@ -10,8 +10,8 @@
   <version>5.8.2</version>
   <packaging>pom</packaging>
 
-  <name>Bio-Formats bundle collection</name>
-  <description>Create matlab of Bio-Formats jars and tools for distribution.</description>
+  <name>Bio-Formats matlab package</name>
+  <description>Create matlab package of Bio-Formats jars and tools for distribution.</description>
   <url>https://www.openmicroscopy.org/bio-formats</url>
   <inceptionYear>2005</inceptionYear>
 
@@ -22,6 +22,9 @@
          versions between various projects in the SciJava software stack.
          When possible, we advise using the relevant groupId and version
          properties for your dependencies rather than hardcoding them. -->
+
+    <test.output.dir>${basedir}/target/matlab-test-results</test.output.dir>
+    <test.output>${test.output.dir}/report.xml</test.output>
 
     <date>${maven.build.timestamp}</date>
     <year>2018</year>
@@ -51,7 +54,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M1</version>
+        <version>3.0.0-M2</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -70,12 +73,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.0.0</version>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.0</version>
       </plugin>
 
       <plugin>
@@ -90,7 +88,7 @@
 
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.5.2</version>
       </plugin>
 
       <plugin>
@@ -107,7 +105,12 @@
 
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.0.2</version>
+        <version>3.1.0</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.7.1</version>
       </plugin>
 
       <plugin>
@@ -136,6 +139,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.1.1</version>
         <executions>
           <execution>
             <id>unpack-ome-xml</id>
@@ -289,7 +293,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.0.2</version>
+            <version>3.1.1</version>
             <executions>
               <execution>
                 <id>unpack</id>
@@ -313,6 +317,26 @@
             </executions>
           </plugin>
           <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>create-test-output-dir</id>
+                <phase>test</phase>
+                <configuration>
+                  <tasks>
+                    <delete dir="${test.output.dir}"/>
+                    <mkdir dir="${test.output.dir}"/>
+                  </tasks>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
             <version>1.6.0</version>
@@ -329,13 +353,13 @@
               <executable>matlab</executable>
               <workingDirectory>${java.io.tmpdir}</workingDirectory>
               <environmentVariables>
-                <MATLABPATH>${project.build.directory}/test-matlab/bio-formats-matlab-${project.version}</MATLABPATH>
+                <MATLABPATH>${project.build.directory}/test-matlab/bio-formats-matlab-${project.version}${path.separator}${basedir}/test</MATLABPATH>
               </environmentVariables>
               <arguments>
                 <argument>-nodesktop</argument>
                 <argument>-nosplash</argument>
                 <argument>-r</argument>
-                <argument>runtests ${project.rootdir}/test</argument>
+                <argument>runbfxunit ${test.output}</argument>
               </arguments>
             </configuration>
           </plugin>
